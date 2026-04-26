@@ -1,5 +1,5 @@
 // ==UserScript==
-// @id             iitc-plugin-dev-url-loader
+// @id             dev-url-loader
 // @name           IITC plugin: Dev URL Loader
 // @category       Dev
 // @version        0.1.0
@@ -9,6 +9,9 @@
 // @match          https://intel.ingress.com/*
 // @match          https://intel-x.ingress.com/*
 // @grant          none
+// @namespace      https://github.com/mdiehn/iitc-plugin-dev-url-loader
+// @updateURL      http://192.168.68.62:8000/dev-url-loader/dev-url-loader.user.js
+// @downloadURL    http://192.168.68.62:8000/dev-url-loader/dev-url-loader.user.js
 // ==/UserScript==
 
 function wrapper(plugin_info) {
@@ -43,20 +46,23 @@ function wrapper(plugin_info) {
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = withCacheBuster(url);
-    script.async = false;
+    const fetchUrl = withCacheBuster(url);
 
-    script.onload = function () {
-      console.log('[Dev URL Loader] loaded:', url);
-    };
-
-    script.onerror = function () {
-      console.error('[Dev URL Loader] failed:', url);
-      alert('Dev URL Loader failed to load:\n' + url);
-    };
-
-    document.body.appendChild(script);
+    fetch(fetchUrl)
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function (code) {
+        const script = document.createElement('script');
+        script.textContent = code + '\n//# sourceURL=' + url;
+        document.body.appendChild(script);
+        console.log('[Dev URL Loader] loaded via fetch:', fetchUrl);
+      })
+      .catch(function (err) {
+        console.error('[Dev URL Loader] failed:', fetchUrl, err);
+        alert('Dev URL Loader failed:\n' + fetchUrl + '\n\n' + err);
+      });
   }
 
   function configure() {
