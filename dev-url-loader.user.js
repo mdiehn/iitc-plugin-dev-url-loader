@@ -2,7 +2,7 @@
 // @id             dev-url-loader
 // @name           IITC plugin: Dev URL Loader
 // @category       Dev
-// @version        0.1.0
+// @version        0.1.1
 // @description    Load another IITC plugin from a configurable URL for development
 // @include        https://intel.ingress.com/*
 // @include        https://intel-x.ingress.com/*
